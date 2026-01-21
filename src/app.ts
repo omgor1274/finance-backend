@@ -1,5 +1,9 @@
 import express from "express";
 import authRoutes from "./routes/auth.routes";
+import searchRoutes from "./routes/search.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
+import notificationRoutes from "./routes/notification.routes";
+import fundroutes from "./routes/funds.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import { applySecurity } from "./middlewares/security.middleware";
 
@@ -7,10 +11,12 @@ const app = express();
 applySecurity(app);
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
-app.use("/api/auth", authRoutes);
+app.use("/api", fundroutes);
+app.use("/api/home", searchRoutes);
+app.use("/api/home", dashboardRoutes);
+app.use("/api/home", notificationRoutes);
 app.use(errorHandler);
-
 
 export default app;

@@ -1,12 +1,10 @@
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_REGEX = /^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{6,}$/;
+
 export const isValidEmail = (email: string): boolean => {
-  const emailRegex =
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  return EMAIL_REGEX.test(email);
 };
 
 export const isValidPassword = (password: string): boolean => {
-  const passwordRegex =
-    /^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{6,}$/;
-
-  return passwordRegex.test(password);
+  return PASSWORD_REGEX.test(password);
 };

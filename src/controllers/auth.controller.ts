@@ -7,49 +7,70 @@ import { sendForgotPasswordOtpMail } from "../services/mail.service";
 import Otp from "../models/Otp.model";
 
 /* utils */
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*]).{6,}$/;
+import { isValidEmail, isValidPassword } from "../validators/auth.validator";
+
 
 /* ===================== LOGIN ===================== */
+import { UserRole } from "../models/User.model";
+
 export const login = async (req: Request, res: Response) => {
   if (!req.body) {
     return sendError(res, 400, "This field is required.");
   }
 
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
-  
+  //  Email validation
   if (!email) {
     return sendError(res, 400, "This field is required.");
   }
 
-
-  if (!emailRegex.test(email)) {
+  if (!isValidEmail(email)) {
     return sendError(res, 400, "Enter a valid email address.");
   }
 
-  
+  //  Password validation
   if (!password) {
     return sendError(res, 400, "This field is required.");
   }
 
-  const user = await User.findOne({ email });
+  //  Role validation (optional but recommended)
+  if (!role) {
+    return sendError(res, 400, "Role is required.");
+  }
 
+  const validRoles = Object.values(UserRole);
+  if (!validRoles.includes(role)) {
+    return sendError(res, 400, "Invalid role.");
+  }
+
+  //  Find user
+  const user = await User.findOne({ email });
 
   if (!user) {
     return sendError(res, 404, "Email address not registered.");
   }
 
-
+  //  Check password
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
     return sendError(res, 400, "Incorrect password. Try again.");
   }
 
-  const token = generateToken(user._id.toString());
+  //  Role match check (IMPORTANT SECURITY)
+  if (user.role !== role) {
+    return sendError(res, 403, "Access denied for this role.");
+  }
 
-  return sendSuccess(res, { token }, 200, "Login successful");
+  // Generate token with role
+  const token = generateToken(
+    user._id.toString(),
+    user.role
+  );
+
+  return sendSuccess(res, { token, role: user.role }, 200, "Login successful");
 };
+
 
 /* ===================== FORGOT PASSWORD ===================== */
 export const forgotPassword = async (req: Request, res: Response) => {
@@ -58,15 +79,16 @@ export const forgotPassword = async (req: Request, res: Response) => {
   if (!email) {
     return sendError(res, 400, "This field is required.");
   }
-  if (!emailRegex.test(email)) {
+  if (!isValidEmail(email)) {
     return sendError(res, 400, "Enter a valid email address.");
   }
+
   const user = await User.findOne({ email });
- 
+
   if (!user) {
     return sendError(res, 404, "Email address not registered.");
   }
- 
+
   const otpData = await createOtp(email, "FORGOT_PASSWORD");
 
   await sendForgotPasswordOtpMail(email, otpData.otp);
@@ -78,8 +100,13 @@ export const forgotPassword = async (req: Request, res: Response) => {
 /* ===================== VERIFY OTP ===================== */
 export const verifyForgotOtp = async (req: Request, res: Response) => {
   const { email, otp } = req.body || {};
+  console.log(email, otp);
+
+  if (!email) {
+    return sendError(res, 400, "Email field is required.");
+  }
   if (!otp) {
-    return sendError(res, 400, "This field is required.");
+    return sendError(res, 400, "OTP field is required.");
   }
 
   const valid = await verifyOtp(email, otp, "FORGOT_PASSWORD");
@@ -124,9 +151,18 @@ export const resetPassword = async (req: Request, res: Response) => {
     return sendError(res, 404, "User not found");
   }
 
+  if (!isValidPassword(newPassword)) {
+    return sendError(
+      res,
+      400,
+      "Password must be at least 6 characters long and include a number and special character."
+    );
+  }
+
+
   user.password = newPassword;
   await user.save();
-  
+
 
   otpRecord.isUsed = true;
   await otpRecord.save();
