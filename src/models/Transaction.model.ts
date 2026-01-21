@@ -104,7 +104,7 @@ const transactionSchema = new Schema<ITransaction>(
         },
 
         attachment: {
-            type: String, // URL (S3 / Cloudinary later)
+            type: String, 
         },
 
         notes: {

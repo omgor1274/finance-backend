@@ -17,8 +17,11 @@ export const createFund = async (req: Request, res: Response) => {
         location,
         date,
         time,
+        attachment,
         notes,
     } = req.body || {};
+
+    const attachmentPath = req.file ? req.file.path : undefined;
 
     if (!partyId) {
         return sendError(res, 400, "Party is required");
@@ -49,6 +52,7 @@ export const createFund = async (req: Request, res: Response) => {
         date,
         time,
         notes,
+        attachment: attachmentPath,
         createdBy: req.user!._id,
     });
 
