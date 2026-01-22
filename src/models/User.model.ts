@@ -8,25 +8,46 @@ export enum UserRole {
   ADMIN = "ADMIN",
 }
 
+export enum SalaryType {
+  MONTHLY = "MONTHLY",
+  DAILY = "DAILY",
+}
+
 export interface IUser extends Document {
   _id: Types.ObjectId;
+
+  // Auth
   email: string;
   password: string;
-  phonenumber : number;
-  role: UserRole;
-  assignedLocations: Types.ObjectId[];
   isEmailVerified: boolean;
   pendingEmail?: string;
 
-  // 🔥 NEW
-  userCode?: string;        // W001 / S001 / A001
-  userCodeNumber?: number;  // 1 / 2 / 3
+  // Profile (from UI)
+  firstName: string;
+  lastName?: string;
+  phonenumber: string;
+  address?: string;
+  dateOfBirth?: Date;
+  profileImage?: string;
+
+  // Salary
+  salary: number;
+  salaryType: SalaryType;
+
+  // Role & hierarchy
+  role: UserRole;
+  assignedLocations: Types.ObjectId[];
+
+  // Indexing
+  userCode?: string;
+  userCodeNumber?: number;
 
   comparePassword(password: string): Promise<boolean>;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
   {
+    /* ================= AUTH ================= */
     email: {
       type: String,
       required: true,
@@ -41,32 +62,64 @@ const userSchema = new mongoose.Schema<IUser>(
       required: true,
     },
 
-    role: {
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    pendingEmail: {
       type: String,
-      enum: Object.values(UserRole),
-      index: true,
+    },
+
+    /* ================= PROFILE ================= */
+    firstName: {
+      type: String,
+      required: true,
       trim: true,
-      default: UserRole.SUPERVISOR,
+    },
+
+    lastName: {
+      type: String,
+      trim: true,
     },
 
     phonenumber: {
-      type: Number,
+      type: String, // 🔥 STRING is better than Number
       required: true,
       unique: true,
-      trim: true,
       index: true,
     },
 
-    //(INDEXING SUPPORT)
-    userCode: {
+    address: {
       type: String,
-      unique: true,
-      sparse: true, // allows ADMIN without code
-      index: true,
+      trim: true,
     },
 
-    userCodeNumber: {
+    dateOfBirth: {
+      type: Date,
+    },
+
+    profileImage: {
+      type: String,
+    },
+
+    /* ================= SALARY ================= */
+    salary: {
       type: Number,
+      required: true,
+    },
+
+    salaryType: {
+      type: String,
+      enum: Object.values(SalaryType),
+      default: SalaryType.MONTHLY,
+    },
+
+    /* ================= ROLE ================= */
+    role: {
+      type: String,
+      enum: Object.values(UserRole),
+      default: UserRole.WORKER,
       index: true,
     },
 
@@ -77,25 +130,30 @@ const userSchema = new mongoose.Schema<IUser>(
       },
     ],
 
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    pendingEmail: {
+    /* ================= INDEXING ================= */
+    userCode: {
       type: String,
+      unique: true,
+      sparse: true,
+      index: true,
+    },
+
+    userCodeNumber: {
+      type: Number,
+      index: true,
     },
   },
   { timestamps: true }
 );
 
-/* Hash password */
+/* ================= PASSWORD HASH ================= */
 userSchema.pre<IUser>("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-/* Compare password */
+/* ================= PASSWORD COMPARE ================= */
 userSchema.methods.comparePassword = function (
   password: string
 ): Promise<boolean> {
