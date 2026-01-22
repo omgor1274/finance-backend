@@ -16,11 +16,14 @@ export const createUser = async (req: Request, res: Response) => {
     salaryType,
     role,
     password,
+    address,
+    bloodGroup,
     dateOfBirth,
   } = req.body;
+  console.log(req.body);
 
   /* ================= BASIC VALIDATION ================= */
-  if (!firstName || !email || !phonenumber || !salary || !role || !password) {
+  if (!firstName || !lastName || !email || !phonenumber || !address || !salary || !role || !password) {
     return sendError(res, 400, "Required fields missing");
   }
 
@@ -62,6 +65,8 @@ export const createUser = async (req: Request, res: Response) => {
     salaryType: salaryType || "MONTHLY",
     role,
     password,
+    address,
+    bloodGroup,
     dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
     profileImage: req.file
       ? `/uploads/users/${req.file.filename}`
@@ -84,3 +89,141 @@ export const createUser = async (req: Request, res: Response) => {
     "User created successfully"
   );
 };
+
+//--------------GET USER----------------//
+
+export const getUser = async (req: Request, res: Response) => {
+  const { userCode, email, phonenumber } = req.query;
+
+  if (!userCode && !email && !phonenumber) {
+    return sendError(
+      res,
+      400,
+      "Provide userCode or email or phonenumber"
+    );
+  }
+
+  const query: any = {};
+
+  if (userCode) query.userCode = userCode;
+  if (email) query.email = String(email).toLowerCase();
+  if (phonenumber) query.phonenumber = phonenumber;
+
+  const user = await User.findOne(query).select("-password");
+
+  if (!user) {
+    return sendError(res, 404, "User not found");
+  }
+
+  const formatIndianDate = (date?: Date) =>
+    date
+      ? date.toLocaleDateString("en-IN").replace(/\//g, "-")
+      : null;
+  return sendSuccess(
+    res,
+    ({
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phonenumber: user.phonenumber,
+      address: user.address,
+      bloodGroup: user.bloodGroup,
+      dateOfBirth: formatIndianDate(user.dateOfBirth),
+      salary: user.salary,
+      salaryType: user.salaryType,
+      role: user.role,
+      userCode: user.userCode,        // read-only
+      assignedLocations: user.assignedLocations,
+      profileImage: user.profileImage,
+    }),
+    200,
+    "User detail"
+  );
+};
+
+
+//--------------Update User-------------//
+
+export const updateUserByKey = async (req: Request, res: Response) => {
+  const { userCode, email, phonenumber } = req.query;
+
+  if (!userCode && !email && !phonenumber) {
+    return sendError(
+      res,
+      400,
+      "Provide userCode or email or phonenumber"
+    );
+  }
+
+  if (req.body.email || req.body.userCode || req.body.role) {
+    return sendError(
+      res,
+      400,
+      "Email, User ID and Role cannot be edited"
+    );
+  }
+
+  const updateData: any = {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    phonenumber: req.body.phonenumber,
+    address: req.body.address,
+    bloodGroup: req.body.bloodGroup,
+    salary: req.body.salary,
+    profileImage: req.body.profileImage,
+    salaryType: req.body.salaryType,
+
+    assignedLocations: req.body.assignedLocations,
+  };
+
+  if (req.body.dateOfBirth) {
+    updateData.dateOfBirth = new Date(req.body.dateOfBirth);
+  }
+
+  if (req.file) {
+    updateData.profileImage = `/uploads/users/${req.file.filename}`;
+  }
+
+  const filter: any = {};
+  if (userCode) filter.userCode = userCode;
+  if (email) filter.email = String(email).toLowerCase();
+  if (phonenumber) filter.phonenumber = phonenumber;
+
+  const user = await User.findOneAndUpdate(filter, updateData, {
+    new: true,
+    runValidators: true,
+  }).select("-password");
+
+  if (!user) {
+    return sendError(res, 404, "User not found");
+  }
+
+  const formatIndianDate = (date?: Date) =>
+    date
+      ? date.toLocaleDateString("en-IN").replace(/\//g, "-")
+      : null;
+
+  return sendSuccess(
+    res,
+    ({
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phonenumber: user.phonenumber,
+      address: user.address,
+      bloodGroup: user.bloodGroup,
+      dateOfBirth: formatIndianDate(user.dateOfBirth),
+      salary: user.salary,
+      salaryType: user.salaryType,
+      role: user.role,
+      userCode: user.userCode,        // read-only
+      assignedLocations: user.assignedLocations,
+      profileImage: user.profileImage,
+    }),
+    200,
+    "User updated successfully"
+  );
+};
+

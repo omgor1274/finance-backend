@@ -13,30 +13,43 @@ export enum SalaryType {
   DAILY = "DAILY",
 }
 
+export enum BloodGroup {
+  A_POS = "A+",
+  A_NEG = "A-",
+  B_POS = "B+",
+  B_NEG = "B-",
+  O_POS = "O+",
+  O_NEG = "O-",
+  AB_POS = "AB+",
+  AB_NEG = "AB-",
+}
+
+
 export interface IUser extends Document {
   _id: Types.ObjectId;
 
   // Auth
   email: string;
   password: string;
-  isEmailVerified: boolean;
+  isEmailVerified?: boolean;
   pendingEmail?: string;
 
   // Profile (from UI)
   firstName: string;
-  lastName?: string;
+  lastName: string;
   phonenumber: string;
-  address?: string;
+  address: string;
+  bloodGroup?: BloodGroup;
   dateOfBirth?: Date;
   profileImage?: string;
 
   // Salary
   salary: number;
-  salaryType: SalaryType;
+  salaryType?: SalaryType;
 
   // Role & hierarchy
   role: UserRole;
-  assignedLocations: Types.ObjectId[];
+  assignedLocations?: Types.ObjectId[];
 
   // Indexing
   userCode?: string;
@@ -84,7 +97,7 @@ const userSchema = new mongoose.Schema<IUser>(
     },
 
     phonenumber: {
-      type: String, // 🔥 STRING is better than Number
+      type: String, 
       required: true,
       unique: true,
       index: true,
@@ -93,6 +106,11 @@ const userSchema = new mongoose.Schema<IUser>(
     address: {
       type: String,
       trim: true,
+    },
+
+    bloodGroup: {
+      type: String,
+      enum: Object.values(BloodGroup),
     },
 
     dateOfBirth: {
