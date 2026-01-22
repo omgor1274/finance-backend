@@ -1,14 +1,14 @@
-import Otp from "../models/Otp.model";
+import Otp, { OtpPurpose } from "../models/Otp.model";
 
 export const createOtp = async (
   email: string,
-  purpose: "FORGOT_PASSWORD"
+  purpose: OtpPurpose
 ) => {
   await Otp.deleteMany({ email, purpose });
 
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-  const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 min
+  const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
 
   const record = await Otp.create({
     email,
@@ -16,7 +16,7 @@ export const createOtp = async (
     purpose,
     expiresAt,
     isVerified: false,
-    isUsed: false
+    isUsed: false,
   });
 
   return record;
@@ -25,21 +25,26 @@ export const createOtp = async (
 export const verifyOtp = async (
   email: string,
   otp: string,
-  purpose: "FORGOT_PASSWORD"
+  purpose: OtpPurpose
 ): Promise<boolean> => {
+
+  otp = otp.toString().trim();
+
   const record = await Otp.findOne({
     email,
     otp,
     purpose,
-    isUsed: false
+    isUsed: false,
   });
 
   if (!record) return false;
 
-  if (record.expiresAt < new Date()) return false;
+  if (record.expiresAt.getTime() < Date.now()) return false;
 
   record.isVerified = true;
+  record.isUsed = true;
   await record.save();
 
   return true;
 };
+

@@ -5,6 +5,7 @@ import { sendSuccess, sendError } from "../utils/apiResponse";
 import { createOtp, verifyOtp } from "../services/otp.service";
 import { sendForgotPasswordOtpMail } from "../services/mail.service";
 import Otp from "../models/Otp.model";
+import { OtpPurpose } from "../models/Otp.model";
 
 /* utils */
 import { isValidEmail, isValidPassword } from "../validators/auth.validator";
@@ -89,7 +90,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     return sendError(res, 404, "Email address not registered.");
   }
 
-  const otpData = await createOtp(email, "FORGOT_PASSWORD");
+  const otpData = await createOtp(email, OtpPurpose.FORGOT_PASSWORD);
 
   await sendForgotPasswordOtpMail(email, otpData.otp);
 
@@ -109,7 +110,7 @@ export const verifyForgotOtp = async (req: Request, res: Response) => {
     return sendError(res, 400, "OTP field is required.");
   }
 
-  const valid = await verifyOtp(email, otp, "FORGOT_PASSWORD");
+  const valid = await verifyOtp(email, otp, OtpPurpose.FORGOT_PASSWORD);
   if (!valid) {
     return sendError(res, 400, "Invalid or expired OTP");
   }

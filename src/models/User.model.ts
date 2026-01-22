@@ -2,17 +2,26 @@ import * as bcrypt from "bcryptjs";
 import mongoose, { Document, Model, Types } from "mongoose";
 
 export enum UserRole {
-  ADMIN = "ADMIN",
+  SUB_ADMIN = "SUB_ADMIN",
+  WORKER = "WORKER",
   SUPERVISOR = "SUPERVISOR",
+  ADMIN = "ADMIN",
 }
 
 export interface IUser extends Document {
   _id: Types.ObjectId;
   email: string;
   password: string;
+  phonenumber : number;
   role: UserRole;
   assignedLocations: Types.ObjectId[];
   isEmailVerified: boolean;
+  pendingEmail?: string;
+
+  // 🔥 NEW
+  userCode?: string;        // W001 / S001 / A001
+  userCodeNumber?: number;  // 1 / 2 / 3
+
   comparePassword(password: string): Promise<boolean>;
 }
 
@@ -24,6 +33,7 @@ const userSchema = new mongoose.Schema<IUser>(
       unique: true,
       lowercase: true,
       trim: true,
+      index: true,
     },
 
     password: {
@@ -34,7 +44,30 @@ const userSchema = new mongoose.Schema<IUser>(
     role: {
       type: String,
       enum: Object.values(UserRole),
-      default: UserRole.ADMIN,
+      index: true,
+      trim: true,
+      default: UserRole.SUPERVISOR,
+    },
+
+    phonenumber: {
+      type: Number,
+      required: true,
+      unique: true,
+      trim: true,
+      index: true,
+    },
+
+    //(INDEXING SUPPORT)
+    userCode: {
+      type: String,
+      unique: true,
+      sparse: true, // allows ADMIN without code
+      index: true,
+    },
+
+    userCodeNumber: {
+      type: Number,
+      index: true,
     },
 
     assignedLocations: [
@@ -47,6 +80,9 @@ const userSchema = new mongoose.Schema<IUser>(
     isEmailVerified: {
       type: Boolean,
       default: false,
+    },
+    pendingEmail: {
+      type: String,
     },
   },
   { timestamps: true }

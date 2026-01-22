@@ -1,5 +1,6 @@
 import path from "path";
 import express from "express";
+import accountroutes from "./routes/account.routes";
 import authRoutes from "./routes/auth.routes";
 import searchRoutes from "./routes/search.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/api", fundroutes);
+app.use("/api/account", accountroutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/home", searchRoutes);
 app.use("/api/parties", partyRoutes);

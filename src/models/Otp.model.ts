@@ -1,9 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export type OtpPurpose = "FORGOT_PASSWORD";
+export enum OtpPurpose {
+  FORGOT_PASSWORD = "FORGOT_PASSWORD",
+  CHANGE_EMAIL = "CHANGE_EMAIL",
+}
 
 export interface IOtp extends Document {
   email: string;
+  pendingEmail?: string;
   otp: string;
   purpose: OtpPurpose;
   expiresAt: Date;
@@ -19,6 +23,10 @@ const otpSchema = new Schema<IOtp>(
       index: true,
     },
 
+    pendingEmail: {
+      type: String,
+    },
+
     otp: {
       type: String,
       required: true,
@@ -26,14 +34,14 @@ const otpSchema = new Schema<IOtp>(
 
     purpose: {
       type: String,
-      enum: ["FORGOT_PASSWORD"],
+      enum: Object.values(OtpPurpose), // ✅ FIX
       required: true,
     },
 
     expiresAt: {
       type: Date,
       required: true,
-      index: { expires: 0 }, 
+      index: { expires: 0 },
     },
 
     isVerified: {

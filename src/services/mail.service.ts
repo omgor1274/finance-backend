@@ -26,7 +26,7 @@ We received a request to reset your password.
 
 Your OTP is: ${otp}
 
-This OTP is valid for the next 10 minutes.
+This OTP is valid for the next 2 minutes.
 
 If you did not request this, please ignore this email.
 
@@ -42,3 +42,33 @@ Team 4TYSIX
   });
 };
 
+
+
+/* ================= CHANGE EMAIL OTP ================= */
+
+export const sendChangeEmailOtpMail = async (
+  to: string,
+  otp: string
+): Promise<void> => {
+  const text = `
+Reset Your Password
+
+We received a request to reset your Email.
+
+Your OTP is: ${otp}
+
+This OTP is valid for the next 2 minutes.
+
+If you did not request this, please ignore this email.
+
+Stay secure,
+Team 4TYSIX
+`;
+
+  await transporter.sendMail({
+    from: `"Cash Book" <${process.env.MAIL_USER}>`,
+    to,
+    subject: "Reset Password - OTP Verification",
+    text
+  });
+};

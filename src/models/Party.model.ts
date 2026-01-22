@@ -10,6 +10,8 @@ export interface IParty extends Document {
     type: PartyType;
     balance: number;
     supervisor?: Types.ObjectId;
+    partyCode: string;        // W001
+    partyCodeNumber: number;  // 1
 }
 
 const partySchema = new Schema<IParty>(
@@ -19,6 +21,18 @@ const partySchema = new Schema<IParty>(
             required: true,
             trim: true,
             index: true,
+        },
+
+        partyCode: {
+            type: String,
+            unique: true,
+            index: true, // 🔥 for search
+        },
+
+        partyCodeNumber: {
+            type: Number,
+            unique: true,
+            index: true, // 🔥 for sorting
         },
 
         type: {

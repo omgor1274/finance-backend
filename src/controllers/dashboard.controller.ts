@@ -22,17 +22,17 @@ const getSupervisorDashboardData = async (userId: string) => {
 
 export const dashboard = async (req: Request, res: Response) => {
     try {
-        if (!req.user) {
+        if ((!req as any).user) {
             return sendError(res, 401, "Unauthorized");
         }
 
-        if (req.user.role === UserRole.ADMIN) {
+        if ((req as any).user.role === UserRole.ADMIN) {
             const data = await getAdminDashboardData();
             return sendSuccess(res, data, 200, "Admin dashboard data");
         }
 
-        if (req.user.role === UserRole.SUPERVISOR) {
-            const data = await getSupervisorDashboardData(req.user._id.toString());
+        if ((req as any).user.role === UserRole.SUPERVISOR) {
+            const data = await getSupervisorDashboardData((req as any).user._id.toString());
             return sendSuccess(res, data, 200, "Supervisor dashboard data");
         }
 

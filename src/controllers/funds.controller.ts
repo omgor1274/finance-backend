@@ -53,7 +53,7 @@ export const createFund = async (req: Request, res: Response) => {
         time,
         notes,
         attachment: attachmentPath,
-        createdBy: req.user!._id,
+        createdBy: (req as any).user!._id,
     });
 
     return sendSuccess(res, transaction, 201, "Fund created successfully");

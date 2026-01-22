@@ -1,9 +1,9 @@
 import * as dotenv from "dotenv";
+import mongoose from "mongoose";
 import User, { UserRole } from "../models/User.model";
+import { generateUserCode } from "../utils/generateUserCode";
 
 dotenv.config();
-
-import mongoose from "mongoose";
 
 const run = async () => {
   try {
@@ -14,10 +14,10 @@ const run = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("MongoDB connected");
 
-    const email = "gorom627@gmail.com";
+    const email = "gorom@gmail.com";
     const password = "newuser1";
+    const phonenumber = 9925371223;
     const role = UserRole.SUPERVISOR;
-
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -25,17 +25,22 @@ const run = async () => {
       process.exit(0);
     }
 
-    await User.create({
+    // 🔥 GENERATE ROLE-BASED CODE
+    const codeData = await generateUserCode(role);
+
+    const user = await User.create({
       email,
       password,
+      phonenumber,
       role,
-      isEmailVerified: true
+      isEmailVerified: true,
+      ...codeData,
     });
 
     console.log("Test user created");
     console.log(" Email:", email);
-    console.log(" Password:", password);
     console.log(" Role:", role);
+    console.log(" Code:", user.userCode);
 
     process.exit(0);
   } catch (err) {
