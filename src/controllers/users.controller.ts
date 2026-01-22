@@ -119,6 +119,12 @@ export const getUser = async (req: Request, res: Response) => {
     date
       ? date.toLocaleDateString("en-IN").replace(/\//g, "-")
       : null;
+
+  const getFullImageUrl = (req: Request, path?: string) => {
+    if (!path) return null;
+    return `${req.protocol}://${req.get("host")}${path}`;
+  };
+
   return sendSuccess(
     res,
     ({
@@ -135,7 +141,7 @@ export const getUser = async (req: Request, res: Response) => {
       role: user.role,
       userCode: user.userCode,        // read-only
       assignedLocations: user.assignedLocations,
-      profileImage: user.profileImage,
+      profileImage: getFullImageUrl(req, user.profileImage),
     }),
     200,
     "User detail"
@@ -204,6 +210,10 @@ export const updateUserByKey = async (req: Request, res: Response) => {
       ? date.toLocaleDateString("en-IN").replace(/\//g, "-")
       : null;
 
+  const getFullImageUrl = (req: Request, path?: string) => {
+    if (!path) return null;
+    return `${req.protocol}://${req.get("host")}${path}`;
+  };
   return sendSuccess(
     res,
     ({
@@ -220,7 +230,7 @@ export const updateUserByKey = async (req: Request, res: Response) => {
       role: user.role,
       userCode: user.userCode,        // read-only
       assignedLocations: user.assignedLocations,
-      profileImage: user.profileImage,
+      profileImage: getFullImageUrl(req, user.profileImage),
     }),
     200,
     "User updated successfully"
