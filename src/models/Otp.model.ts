@@ -34,14 +34,14 @@ const otpSchema = new Schema<IOtp>(
 
     purpose: {
       type: String,
-      enum: Object.values(OtpPurpose), // ✅ FIX
+      enum: Object.values(OtpPurpose),
       required: true,
     },
 
     expiresAt: {
       type: Date,
       required: true,
-      index: { expires: 0 },
+      index: true,
     },
 
     isVerified: {

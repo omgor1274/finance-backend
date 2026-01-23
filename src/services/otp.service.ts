@@ -8,7 +8,7 @@ export const createOtp = async (
 
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-  const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
   const record = await Otp.create({
     email,

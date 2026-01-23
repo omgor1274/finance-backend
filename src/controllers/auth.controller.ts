@@ -124,6 +124,15 @@ export const verifyForgotOtp = async (req: Request, res: Response) => {
 export const resetPassword = async (req: Request, res: Response) => {
   const { email, newPassword, confirmPassword } = req.body || {};
 
+  if (!email) {
+    return sendError(res, 400, "Email field is required.");
+  }
+
+
+  if (!isValidEmail(email)) {
+    return sendError(res, 400, "Enter a valid email address.");
+  }
+
   if (!newPassword || !confirmPassword) {
     return sendError(res, 400, "This field is required.");
   }
@@ -131,19 +140,27 @@ export const resetPassword = async (req: Request, res: Response) => {
   if (newPassword !== confirmPassword) {
     return sendError(res, 400, "Passwords do not match.");
   }
+  if (!isValidPassword(newPassword)) {
+    return sendError(
+      res,
+      400,
+      "Password must be at least 6 characters long and include a number and special character."
+    );
+  }
 
   const otpRecord = await Otp.findOne({
     email,
-    purpose: "FORGOT_PASSWORD",
+    purpose: OtpPurpose.FORGOT_PASSWORD,
     isVerified: true,
     isUsed: false
+
   });
 
   if (!otpRecord) {
     return sendError(
       res,
       403,
-      "OTP verification required before resetting password."
+      "OTP not verified. Please verify OTP before resetting password."
     );
   }
 

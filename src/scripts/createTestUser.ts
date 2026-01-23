@@ -14,10 +14,10 @@ const run = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("MongoDB connected");
 
-    const email = "gorom@gmail.com";
-    const password = "newuser1";
-    const phonenumber = 9925371223;
-    const role = UserRole.SUPERVISOR;
+    const email = "gorom123@gmail.com";
+    // const password = "admin";
+    // const phonenumber = 9925371223;
+    const role = UserRole.WORKER;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -25,22 +25,22 @@ const run = async () => {
       process.exit(0);
     }
 
-    // 🔥 GENERATE ROLE-BASED CODE
     const codeData = await generateUserCode(role);
 
-    const user = await User.create({
-      email,
-      password,
-      phonenumber,
-      role,
+    await User.create({
+      firstName: "worker",
+      lastName: "worker",
+      email: "gorom123@gmail.com",
+      password: "sup",
+      phonenumber: 9925371221,
+      salary: 0,
+      role: UserRole.WORKER,
       isEmailVerified: true,
-      ...codeData,
     });
 
     console.log("Test user created");
     console.log(" Email:", email);
     console.log(" Role:", role);
-    console.log(" Code:", user.userCode);
 
     process.exit(0);
   } catch (err) {

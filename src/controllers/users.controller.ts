@@ -7,6 +7,7 @@ import { generateUserCode } from "../utils/generateUserCode";
 export const createUser = async (req: Request, res: Response) => {
   const authUser = (req as any).user;
 
+
   const {
     firstName,
     lastName,
@@ -20,7 +21,13 @@ export const createUser = async (req: Request, res: Response) => {
     bloodGroup,
     dateOfBirth,
   } = req.body;
-  console.log(req.body);
+  if (role === UserRole.ADMIN) {
+    return sendError(
+      res,
+      403,
+      "Creating ADMIN users is not allowed"
+    );
+  }
 
   /* ================= BASIC VALIDATION ================= */
   if (!firstName || !lastName || !email || !phonenumber || !address || !salary || !role || !password) {
@@ -56,6 +63,11 @@ export const createUser = async (req: Request, res: Response) => {
       ? date.toLocaleDateString("en-IN").replace(/\//g, "-")
       : null;
 
+      const getFullImageUrl = (req: Request, path?: string) => {
+    if (!path) return null;
+    return `${req.protocol}://${req.get("host")}${path}`;
+  };
+
   const user = await User.create({
     firstName,
     lastName,
@@ -69,8 +81,8 @@ export const createUser = async (req: Request, res: Response) => {
     bloodGroup,
     dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
     profileImage: req.file
-      ? `/uploads/users/${req.file.filename}`
-      : undefined,
+    ? `/uploads/users/${req.file.filename}`
+    : undefined,
     ...codeData,
   });
 
