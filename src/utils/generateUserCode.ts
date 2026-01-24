@@ -5,7 +5,8 @@ const rolePrefixMap: Record<UserRole, string | null> = {
     WORKER: "W",
     SUPERVISOR: "S",
     SUB_ADMIN: "A",
-    ADMIN: null, // no code for admin
+    ADMIN: null, 
+    VENDOR: "V",
 };
 
 export const generateUserCode = async (role: UserRole) => {

@@ -5,6 +5,7 @@ export const CAN_CREATE: Record<UserRole, UserRole[]> = {
     UserRole.SUB_ADMIN,
     UserRole.SUPERVISOR,
     UserRole.WORKER,
+    UserRole.VENDOR,
   ],
 
   SUB_ADMIN: [], // blocked but can enable later
@@ -14,4 +15,5 @@ export const CAN_CREATE: Record<UserRole, UserRole[]> = {
   ],
 
   WORKER: [],
+  VENDOR: [],
 };

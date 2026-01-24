@@ -113,8 +113,6 @@ export const updateBill = async (req: Request, res: Response) => {
         paidAmount,
         paymentMethod,
         notes,
-        location,
-        referenceNumber,
     } = req.body || {};
 
     const bill = await Bill.findById(req.params.id);

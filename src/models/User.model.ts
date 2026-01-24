@@ -6,6 +6,7 @@ export enum UserRole {
   WORKER = "WORKER",
   SUPERVISOR = "SUPERVISOR",
   ADMIN = "ADMIN",
+  VENDOR = "VENDOR",
 }
 
 export enum SalaryType {
@@ -99,7 +100,7 @@ const userSchema = new mongoose.Schema<IUser>(
     },
 
     phonenumber: {
-      type: String, 
+      type: String,
       required: true,
       unique: true,
       index: true,

@@ -5,6 +5,7 @@ import { UserRole } from "../models/User.model";
 
 /* ================= CREATE VENDOR ================= */
 export const createVendor = async (req: Request, res: Response) => {
+
   const user = (req as any).user;
 
   // Only ADMIN & SUPERVISOR
@@ -82,11 +83,6 @@ export const getVendorById = async (req: Request, res: Response) => {
 
 /* ================= UPDATE VENDOR ================= */
 export const updateVendor = async (req: Request, res: Response) => {
-  const user = (req as any).user;
-
-  if (![UserRole.ADMIN, UserRole.SUPERVISOR].includes(user.role)) {
-    return sendError(res, 403, "Not allowed");
-  }
 
   const vendor = await Vendor.findByIdAndUpdate(
     req.params.id,
