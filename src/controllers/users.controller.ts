@@ -35,13 +35,11 @@ export const createUser = async (req: Request, res: Response) => {
   }
 
   /* ================= ROLE PERMISSION CHECK ================= */
-  const allowedRoles = CAN_CREATE[authUser.role as UserRole] || [];
-
-  if (!allowedRoles.includes(role)) {
+  if (authUser.role !== UserRole.ADMIN) {
     return sendError(
       res,
       403,
-      "You are not allowed to create this user role"
+      "Only admin can create users"
     );
   }
 
@@ -63,7 +61,7 @@ export const createUser = async (req: Request, res: Response) => {
       ? date.toLocaleDateString("en-IN").replace(/\//g, "-")
       : null;
 
-      const getFullImageUrl = (req: Request, path?: string) => {
+  const getFullImageUrl = (req: Request, path?: string) => {
     if (!path) return null;
     return `${req.protocol}://${req.get("host")}${path}`;
   };
@@ -81,8 +79,8 @@ export const createUser = async (req: Request, res: Response) => {
     bloodGroup,
     dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
     profileImage: req.file
-    ? `/uploads/users/${req.file.filename}`
-    : undefined,
+      ? `/uploads/users/${req.file.filename}`
+      : undefined,
     ...codeData,
   });
 

@@ -6,6 +6,6 @@ import { UserRole } from "../models/User.model";
 
 const router = Router();
 
-router.get("/dashboard", protect, requireRole([UserRole.ADMIN, UserRole.SUPERVISOR]), dashboard);
+router.get("/", protect, requireRole([UserRole.ADMIN, UserRole.SUPERVISOR]), dashboard);
 
 export default router;

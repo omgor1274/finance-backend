@@ -11,9 +11,9 @@ import { requirePermission } from "../middlewares/permission.middleware";
 
 const router = Router();
 
-router.post("/vendors", protect, requirePermission(Permission.VENDORS), createVendor);
-router.get("/vendors", protect, getVendors);
-router.get("/vendors/:id", protect, getVendorById);
-router.put("/vendors/:id", protect, requirePermission(Permission.VENDORS), updateVendor);
+router.post("/", protect, requirePermission(Permission.VENDORS), createVendor);
+router.get("/", protect, getVendors);
+router.get("/:id", protect, getVendorById);
+router.put("/:id", protect, requirePermission(Permission.VENDORS), updateVendor);
 
 export default router;

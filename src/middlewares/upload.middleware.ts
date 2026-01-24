@@ -1,6 +1,6 @@
-import multer from "multer";
-import path from "path";
 import fs from "fs";
+import path from "path";
+import multer from "multer";
 
 // Ensure the directory exists
 const uploadDir = "uploads/attachments";

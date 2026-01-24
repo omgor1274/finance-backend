@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
+import { UserRole } from "../models/User.model";
 import BankAccount from "../models/BankAccount.model";
 import { sendError, sendSuccess } from "../utils/apiResponse";
-import { UserRole } from "../models/User.model";
 
 /* ================= CREATE BANK ACCOUNT ================= */
 export const createBankAccount = async (req: Request, res: Response) => {

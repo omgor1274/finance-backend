@@ -1,133 +1,112 @@
 import { Request, Response } from "express";
-import Attendance from "../models/Attendance.model";
 import User, { UserRole } from "../models/User.model";
-import { sendError, sendSuccess } from "../utils/apiResponse";
+import { sendSuccess, sendError } from "../utils/apiResponse";
+import Attendance, { AttendanceStatus } from "../models/Attendance.model";
 
+/**
+ * 🔍 Search users for attendance
+ */
+export const searchUsersForAttendance = async (req: Request, res: Response) => {
+    const { q } = req.query;
 
-/* ================= GET ATTENDANCE ================= */
-export const getAttendance = async (req: Request, res: Response) => {
-    const user = (req as any).user;
+    if (!q) return sendSuccess(res, [], 200, "No query");
 
-    if (![UserRole.ADMIN].includes(user.role)) {
-        return sendError(res, 403, "Not allowed");
-    }
+    const users = await User.find({
+        role: UserRole.WORKER,
+        $or: [
+            { userCode: { $regex: q as string, $options: "i" } },
+            { firstName: { $regex: q as string, $options: "i" } },
+            { lastName: { $regex: q as string, $options: "i" } },
+        ],
+    }).select("userCode firstName lastName role");
 
-    const { date, site } = req.query;
-    if (!date || !site) {
-        return sendError(res, 400, "Date and site are required");
-    }
+    const result = users.map((u) => ({
+        userCode: u.userCode,
+        userName: `${u.firstName} ${u.lastName}`,
+        role: u.role,
+    }));
 
-    const attendance = await Attendance.findOne({ date, site })
-        .populate("entries.worker", "firstName lastName userCode profileImage");
-
-    return sendSuccess(
-        res,
-        attendance || { entries: [] },
-        200,
-        "Attendance fetched"
-    );
+    return sendSuccess(res, result, 200, "Users fetched");
 };
 
-
-/* ================= MARK ATTENDANCE ================= */
+/**
+ * ✅ Mark / Update attendance
+ */
 export const markAttendance = async (req: Request, res: Response) => {
-    const user = (req as any).user;
+    const authUser = (req as any).user;
 
-    if (![UserRole.ADMIN].includes(user.role)) {
-        return sendError(res, 403, "Not allowed");
+    const {
+        userCode,
+        date,
+        location,
+        status,
+        inTime,
+        outTime,
+        workingHours,
+        remarks,
+    } = req.body;
+
+    if (!userCode || !date || !location || !status) {
+        return sendError(res, 400, "Invalid payload");
     }
 
-    const { date, site, workerId, slot } = req.body;
-
-    if (!date || !site || !workerId || !slot) {
-        return sendError(res, 400, "Required fields missing");
+    // 🔐 Location permission
+    if (
+        authUser.role !== UserRole.ADMIN &&
+        !authUser.assignedLocations?.includes(location)
+    ) {
+        return sendError(res, 403, "Location access denied");
     }
 
-    const worker = await User.findById(workerId);
-    if (!worker || worker.role !== UserRole.WORKER) {
-        return sendError(res, 404, "Worker not found");
-    }
+    const user = await User.findOne({ userCode });
+    if (!user) return sendError(res, 404, "User not found");
 
     const attendance = await Attendance.findOneAndUpdate(
-        { date, site },
-        { $setOnInsert: { date, site, markedBy: user._id } },
+        { userId: user._id, date, location },
+        {
+            userId: user._id,
+            userCode: user.userCode,
+            userName: `${user.firstName} ${user.lastName}`,
+            role: user.role,
+            date,
+            location,
+            status,
+            inTime,
+            outTime,
+            workingHours,
+            remarks,
+            markedBy: authUser._id,
+        },
         { upsert: true, new: true }
     );
 
-    const entry = attendance.entries.find(
-        e => e.worker.toString() === workerId
-    );
-
-    if (entry) {
-        if (!entry.slots.includes(slot)) {
-            entry.slots.push(slot);
-        }
-    } else {
-        attendance.entries.push({
-            worker: worker._id,
-            workerCode: worker.userCode!,
-            slots: [slot],
-        });
-    }
-
-    await attendance.save();
-
-    return sendSuccess(res, attendance, 200, "Attendance marked");
+    return sendSuccess(res, attendance, 200, "Attendance saved");
 };
 
-/* ================= REMOVE SLOT ================= */
-export const removeAttendanceSlot = async (req: Request, res: Response) => {
-    const { date, site, workerId, slot, user } = req.body;
+/**
+ * 📅 Get attendance list (UI table)
+ */
+export const getAttendanceByDateAndLocation = async (
+    req: Request,
+    res: Response
+) => {
+    const authUser = (req as any).user;
+    const { date, location } = req.query;
 
-    if (![UserRole.ADMIN].includes(user.role)) {
-        return sendError(res, 403, "Not allowed");
+    if (!date || !location) {
+        return sendError(res, 400, "Date and location required");
     }
 
-    const attendance = await Attendance.findOne({ date, site });
-    if (!attendance) {
-        return sendError(res, 404, "Attendance not found");
+    if (
+        authUser.role !== UserRole.ADMIN &&
+        !authUser.assignedLocations?.includes(location)
+    ) {
+        return sendError(res, 403, "Location access denied");
     }
 
-    const entry = attendance.entries.find(
-        e => e.worker.toString() === workerId
-    );
+    const records = await Attendance.find({ date, location }).sort({
+        userCode: 1,
+    });
 
-    if (!entry) {
-        return sendError(res, 404, "Worker entry not found");
-    }
-
-    entry.slots = entry.slots.filter(s => s !== slot);
-    await attendance.save();
-
-    return sendSuccess(res, attendance, 200, "Attendance updated");
+    return sendSuccess(res, records, 200, "Attendance fetched");
 };
-
-/* ================= SEARCH WORKERS ================= */
-export const searchWorkers = async (req: Request, res: Response) => {
-    const user = (req as any).user;
-    if (![UserRole.ADMIN].includes(user.role)) {
-        return sendError(res, 403, "Not allowed");
-    }
-
-    const q = (req.query.q as string)?.trim();
-
-    if (!q) {
-        return sendSuccess(res, [], 200, "No query");
-    }
-
-    const regex = new RegExp(q, "i");
-    
-
-    const workers = await User.find({
-        role: UserRole.WORKER,
-        $or: [
-            { firstName: regex },
-            { lastName: regex },
-            { userCode: regex },
-        ],
-
-    }).select("firstName lastName userCode profileImage");
-
-    return sendSuccess(res, workers, 200, "Workers found");
-};
-

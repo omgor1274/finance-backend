@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
+import { UserRole } from "../models/User.model";
 import RolePermission from "../models/Permission.model";
 import { sendSuccess, sendError } from "../utils/apiResponse";
-import { UserRole } from "../models/User.model";
 
 /**
  * Get permissions for a role

@@ -9,15 +9,15 @@ import {
 const router = Router();
 
 router.post(
-    "/users",
+    "/",
     protect,
     uploadUserImage.single("profileImage"),
     createUser
 );
-router.get("/users", protect, getUser);
+router.get("/", protect, getUser);
 
 router.put(
-    "/users",
+    "/",
     protect,
     uploadUserImage.single("profileImage"),
     updateUserByKey

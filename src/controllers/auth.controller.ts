@@ -1,11 +1,11 @@
+import Otp from "../models/Otp.model";
 import User from "../models/User.model";
 import { Request, Response } from "express";
+import { OtpPurpose } from "../models/Otp.model";
 import { generateToken } from "../services/token.service";
 import { sendSuccess, sendError } from "../utils/apiResponse";
 import { createOtp, verifyOtp } from "../services/otp.service";
 import { sendForgotPasswordOtpMail } from "../services/mail.service";
-import Otp from "../models/Otp.model";
-import { OtpPurpose } from "../models/Otp.model";
 
 /* utils */
 import { isValidEmail, isValidPassword } from "../validators/auth.validator";
@@ -101,7 +101,6 @@ export const forgotPassword = async (req: Request, res: Response) => {
 /* ===================== VERIFY OTP ===================== */
 export const verifyForgotOtp = async (req: Request, res: Response) => {
   const { email, otp } = req.body || {};
-  console.log(email, otp);
 
   if (!email) {
     return sendError(res, 400, "Email field is required.");

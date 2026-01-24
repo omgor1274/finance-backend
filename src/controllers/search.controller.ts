@@ -1,6 +1,6 @@
+import Party from "../models/Party.model";
 import { Request, Response } from "express";
 import { sendSuccess } from "../utils/apiResponse";
-import Party from "../models/Party.model";
 import Transaction from "../models/Transaction.model";
 import User, { UserRole } from "../models/User.model";
 

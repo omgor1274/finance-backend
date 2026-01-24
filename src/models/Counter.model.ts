@@ -1,8 +1,13 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-const counterSchema = new Schema({
-    key: { type: String, unique: true },
+export interface ICounter extends Document {
+    key: string;
+    seq: number;
+}
+
+const counterSchema = new Schema<ICounter>({
+    key: { type: String, required: true, unique: true },
     seq: { type: Number, default: 0 },
 });
 
-export default mongoose.model("Counter", counterSchema);
+export default mongoose.model<ICounter>("Counter", counterSchema);

@@ -1,8 +1,8 @@
-import express, { Express } from "express";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import slowDown from "express-slow-down";
 import cors from "cors";
+import helmet from "helmet";
+import slowDown from "express-slow-down";
+import rateLimit from "express-rate-limit";
+import express, { Express } from "express";
 
 const hpp = require("hpp");
 

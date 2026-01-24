@@ -1,20 +1,37 @@
 import { Router } from "express";
-import { createFund } from "../controllers/funds.controller";
+import {
+    createFund,
+    getFunds,
+    getFundById,
+} from "../controllers/funds.controller";
 import { protect } from "../middlewares/auth.middleware";
-import { requireRole } from "../middlewares/role.middleware";
-import { UserRole } from "../models/User.model";
-import { upload } from "../middlewares/upload.middleware";
 import { requirePermission } from "../middlewares/permission.middleware";
 import { Permission } from "../constants/permissions";
 
 const router = Router();
 
+// ➕ Create fund
 router.post(
-    "/admin/funds",
+    "/",
     protect,
-    requirePermission(Permission.BANK_ACCOUNT),
-    upload.single("attachment"),
+    requirePermission(Permission.FUNDS),
     createFund
+);
+
+// 📄 Get fund list
+router.get(
+    "/",
+    protect,
+    requirePermission(Permission.FUNDS),
+    getFunds
+);
+
+// 🔍 Get fund detail
+router.get(
+    "/:id",
+    protect,
+    requirePermission(Permission.FUNDS),
+    getFundById
 );
 
 export default router;

@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import { sendError } from "../utils/apiResponse";
 import { UserRole } from "../models/User.model";
+import { sendError } from "../utils/apiResponse";
+import { Request, Response, NextFunction } from "express";
 
 export const requireRole =
   (allowedRoles: UserRole[]) =>

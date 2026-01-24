@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Vendor from "../models/Vendor.model";
-import { sendError, sendSuccess } from "../utils/apiResponse";
 import { UserRole } from "../models/User.model";
+import { sendError, sendSuccess } from "../utils/apiResponse";
 
 /* ================= CREATE VENDOR ================= */
 export const createVendor = async (req: Request, res: Response) => {

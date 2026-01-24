@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
-import { sendSuccess, sendError } from "../utils/apiResponse";
-import User from "../models/User.model";
-import { isValidEmail, isValidPassword } from "../validators/auth.validator";
 import bcrypt from "bcryptjs";
+import User from "../models/User.model";
+import { Request, Response } from "express";
 import { OtpPurpose } from "../models/Otp.model";
+import { sendSuccess, sendError } from "../utils/apiResponse";
 import { createOtp, verifyOtp } from "../services/otp.service";
 import { sendChangeEmailOtpMail } from "../services/mail.service";
+import { isValidEmail, isValidPassword } from "../validators/auth.validator";
 
 /* ================= UPDATE PROFILE ================= */
 

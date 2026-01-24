@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
+import { UserRole } from "../models/User.model";
 import Bill, { BillStatus } from "../models/Bill.model";
 import { sendError, sendSuccess } from "../utils/apiResponse";
-import { UserRole } from "../models/User.model";
 
 /* ================= CREATE BILL ================= */
 export const createBill = async (req: Request, res: Response) => {

@@ -4,6 +4,6 @@ import { protect } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.get("/search", protect, globalSearch);
+router.get("/", protect, globalSearch);
 
 export default router;

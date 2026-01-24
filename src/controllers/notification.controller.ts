@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Notification from "../models/Notification.model";
 import { sendSuccess } from "../utils/apiResponse";
+import Notification from "../models/Notification.model";
 
 /* ================= GET NOTIFICATIONS ================= */
 export const getNotifications = async (req: Request, res: Response) => {

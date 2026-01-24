@@ -10,7 +10,7 @@ export const requirePermission = (permission: Permission) => {
             return res.status(401).json({ message: "Unauthorized" });
         }
 
-        // Admin always allowed
+        // 🔥 ADMIN can access everything
         if (user.role === "ADMIN") {
             return next();
         }
@@ -19,7 +19,13 @@ export const requirePermission = (permission: Permission) => {
             role: user.role,
         });
 
-        if (!rolePermission || !rolePermission.permissions.includes(permission)) {
+        if (!rolePermission) {
+            return res.status(403).json({
+                message: "Permission denied",
+            });
+        }
+
+        if (!rolePermission.permissions.includes(permission)) {
             return res.status(403).json({
                 message: "Permission denied",
             });
